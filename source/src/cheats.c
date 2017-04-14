@@ -26,6 +26,7 @@ u32 num_cheats = 0;
 static void decrypt_gsa_code(int *address_ptr, int *value_ptr, CHEAT_VARIANT_ENUM cheat_variant);
 static void process_cheat_gs1(CHEAT_TYPE *cheat);
 static void process_cheat_gs3(CHEAT_TYPE *cheat);
+static void process_cheat_xta(CHEAT_TYPE *cheat);
 
 
 static void decrypt_gsa_code(int *address_ptr, int *value_ptr, CHEAT_VARIANT_ENUM cheat_variant)
