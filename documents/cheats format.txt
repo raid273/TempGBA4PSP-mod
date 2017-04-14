@@ -1,4 +1,4 @@
-code_format:
+code_format(ignore case):
 
 gameshark_v1
 gameshark_v2
@@ -9,14 +9,22 @@ PAR_v3
 direct_v1
 direct_v2
 direct_v3
+#
+X-TA
+codebreaker
+!
 
-gameshark_v1=gameshark_v2=PAR_v1=PAR_v2,gameshark_v3=PAR_v3,direct_v1=direct_v2
+
+gameshark_v1=gameshark_v2=PAR_v1=PAR_v2, gameshark_v3=PAR_v3, direct_v1=direct_v2, direct_v3=#, X-TA=CodeBreaker=!
 
 direct_v1/v2:
 no encrypte gameshark_v1/v2/PAR_v1/v2
 
-direct_v3:
+direct_v3, #:
 no encrypte gameshark_v3/PAR_v3
+
+X-TA, codebreaker, !:
+encrypted code is not supported
 
 
 EX.
@@ -31,9 +39,18 @@ direct_v3 money max
 
 # money max
 04200454 05F5E0FF
+-----------------
+X-TA money max
+82000454 E0FF
+82000456 05F5
+
+! money max
+82000454 E0FF
+82000456 05F5
+-----------------
 
 
 code_name:
-when emlutor language select japanese,cheat file charset use SHIFT-JIS,other ANSI.
+when emulator language select japanese,cheat file charset use SHIFT-JIS(not UTF-8!!), other ANSI.
 SJIS:12 全角文字、24半角文字
 ANSI:24 characters
