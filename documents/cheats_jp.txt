@@ -24,9 +24,11 @@ dir.cfgで指定したフォルダに、[ROM名].chtで保存する
 		direct_v1
 		direct_v2
 		direct_v3
+		X-TA
+		codebreaker
 
 		注意
-			・gameshark_v1=gameshark_v2=PAR_v1=PAR_v2,gameshark_v3=PAR_v3,direct_v1=direct_v2で、実質4種類
+			・gameshark_v1=gameshark_v2=PAR_v1=PAR_v2, gameshark_v3=PAR_v3, direct_v1=direct_v2, X-TA=codebreakerなので実質5種類
 			・direct_v1/v2はgameshark_v1/v2/PAR_v1/v2、direct_v2はgameshark_v3/PAR_v3の非暗号化コード
 
 	code_name
@@ -167,3 +169,64 @@ gameshark_v3/PAR_v3/direct_v3
 
 		注意
 		現在未対応
+
+
+X-TA/CodeBreaker
+
+	3aaaaaaa 00xx
+		アドレスaaaaaaaに1byteデータxxを書込
+
+	8aaaaaaa xxxx
+		アドレスaaaaaaaに2byteデータxxxxを書込
+
+	2aaaaaaa xxxx
+		アドレスaaaaaaaから2byte分のデータとxxxxをOR
+
+	6aaaaaaa xxxx
+		アドレスaaaaaaaから2byte分のデータとxxxxをAND
+
+	4aaaaaaa xxxx
+	yyyycccc bbbb
+		アドレスaaaaaaaにアドレス加算値bbbbを、2byteデータxxxxにデータ加算値yyyyを加えながら
+		cccc回繰り返し書込
+
+	5aaaaaaa cccc
+	xxxxxxxx xxxx
+	...
+		cccc*2byteのデータxxxxをアドレスaaaaaaaから書込
+
+		注意
+		現在未対応
+
+	Eaaaaaaa xxxx
+		アドレスaaaaaaaの内容に2byteデータxxxxを加算
+
+		注意
+		現在未対応
+
+	7aaaaaaa xxxx [a]==x
+	Aaaaaaaa xxxx [a]!=x
+	Baaaaaaa xxxx [a]>x
+	Caaaaaaa xxxx [a]<x
+	Faaaaaaa xxxx [a]&x
+		アドレスaaaaaaaから2byte分のデータをxxxxと比較し、偽の場合は次のコードをスキップする
+
+		注意
+		現在[a]==xと[a]&x以外は未対応
+
+	D0000010 xxxx !=
+	D0000020 xxxx ==
+		xxxxとパッドデータ(加算方式)を比較し、偽の場合は次のコードをスキップする
+
+	1aaaaaaa yyyy
+	0000xxxx yyyy
+		通称マスターコード、実機ではチートを有効にするのに必要
+		gpSPでは必要としない
+
+	9xxxxxxx xxxx
+		マスターコードのオプションで、復号化用の数値を指定する
+		コードが暗号化されていない場合は不要
+
+		注意
+		現在非対応
+
