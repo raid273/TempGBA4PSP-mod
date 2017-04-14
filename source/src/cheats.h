@@ -31,6 +31,7 @@ typedef enum
   CHEAT_TYPE_GAMESHARK_V3,
   CHEAT_TYPE_DIRECT_V1,
   CHEAT_TYPE_DIRECT_V3,
+  CHEAT_TYPE_XTA,
   CHEAT_TYPE_INVALID
 } CHEAT_VARIANT_ENUM;
 
@@ -43,12 +44,12 @@ typedef struct
   CHEAT_VARIANT_ENUM cheat_variant;
 } CHEAT_TYPE;
 
-// ƒOƒ[ƒoƒ‹•Ï”éŒ¾
+// ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°å®£è¨€
 
 extern CHEAT_TYPE cheats[MAX_CHEATS];
 extern u32 num_cheats;
 
-// ŠÖ”éŒ¾
+// é–¢æ•°å®£è¨€
 
 void process_cheats(void);
 void add_cheats(char *cheats_filename);
