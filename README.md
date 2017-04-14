@@ -1,5 +1,8 @@
 # TempGBA4PSP-mod
 
+Added X-TA(CodeBreaker) format for cheats function.
+
+---------------------------------------------------------
 Based on this version (TempGBA4PSP-26731020), http://www1.axfc.net/uploader/so/3063963
 
 Added gpsp kai 's cheats function.
