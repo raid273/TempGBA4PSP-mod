@@ -23,24 +23,20 @@
 CHEAT_TYPE ALIGN_DATA cheats[MAX_CHEATS];
 u32 num_cheats = 0;
 
-static void decrypt_gsa_code(int *address_ptr, int *value_ptr,
- CHEAT_VARIANT_ENUM cheat_variant);
+static void decrypt_gsa_code(int *address_ptr, int *value_ptr, CHEAT_VARIANT_ENUM cheat_variant);
 static void process_cheat_gs1(CHEAT_TYPE *cheat);
 static void process_cheat_gs3(CHEAT_TYPE *cheat);
 
 
-static void decrypt_gsa_code(int *address_ptr, int *value_ptr,
- CHEAT_VARIANT_ENUM cheat_variant)
+static void decrypt_gsa_code(int *address_ptr, int *value_ptr, CHEAT_VARIANT_ENUM cheat_variant)
 {
   u32 i;
   u32 address = *address_ptr;
   u32 value = *value_ptr;
   u32 r = 0xc6ef3720;
 
-  const u32 ALIGN_DATA seeds_v1[4]
-   = {0x09f4fbbd, 0x9681884a, 0x352027e9, 0xf3dee5a7};
-  const u32 ALIGN_DATA seeds_v3[4]
-   = {0x7aa9648f, 0x7fae6994, 0xc0efaad5, 0x42712c57};
+  const u32 ALIGN_DATA seeds_v1[4] = {0x09f4fbbd, 0x9681884a, 0x352027e9, 0xf3dee5a7};
+  const u32 ALIGN_DATA seeds_v3[4] = {0x7aa9648f, 0x7fae6994, 0xc0efaad5, 0x42712c57};
   u32 *seeds;
 
   if(cheat_variant == CHEAT_TYPE_GAMESHARK_V1)
@@ -50,10 +46,8 @@ static void decrypt_gsa_code(int *address_ptr, int *value_ptr,
 
   for(i = 0; i < 32; i++)
   {
-    value -= ((address << 4) + seeds[2]) ^ (address + r) ^ ((address >> 5)
-     + seeds[3]);
-    address -= ((value << 4) + seeds[0]) ^ (value + r) ^ ((value >> 5)
-     + seeds[1]);
+    value -= ((address << 4) + seeds[2]) ^ (address + r) ^ ((address >> 5) + seeds[3]);
+    address -= ((value << 4) + seeds[0]) ^ (value + r) ^ ((value >> 5) + seeds[1]);
     r -= 0x9e3779b9;
   }
 
@@ -115,16 +109,19 @@ void add_cheats(char *cheats_filename)
       }
       else
 
-      if(!strcasecmp(current_line, "direct_v3"))
+      if(!strcasecmp(current_line, "direct_v3") ||
+        !strcasecmp(current_line, "#"))
       {
         current_cheat_variant = CHEAT_TYPE_DIRECT_V3;
       }
 
       else
 
-      if(!strcasecmp(current_line, "#"))
+      if(!strcasecmp(current_line, "X-TA") ||
+        !strcasecmp(current_line, "codebreaker") ||
+        !strcasecmp(current_line, "!"))
       {
-        current_cheat_variant = CHEAT_TYPE_DIRECT_V3;
+        current_cheat_variant = CHEAT_TYPE_XTA;
       }
 
       else
@@ -165,7 +162,8 @@ void add_cheats(char *cheats_filename)
           sscanf(current_line, "%08x %08x", &address, &value);
 
           if((current_cheat_variant != CHEAT_TYPE_DIRECT_V1) &&
-             (current_cheat_variant != CHEAT_TYPE_DIRECT_V3))
+             (current_cheat_variant != CHEAT_TYPE_DIRECT_V3) &&
+             (current_cheat_variant != CHEAT_TYPE_XTA))
             decrypt_gsa_code(&address, &value, current_cheat_variant);
 
           cheat_code_ptr[0] = address;
@@ -241,13 +239,8 @@ static void process_cheat_gs1(CHEAT_TYPE *cheat)
       case 0x6:
         if(gamepak_file_large == -1)  // オンメモリのROMの場合だけ
         {
-          ADDRESS16(gamepak_rom, (address * 2) - 0x08000000)
-           = (value & 0xFFFF);  // データの書込み
+          ADDRESS16(gamepak_rom, (address << 1) - 0x08000000) = (value & 0xFFFF);  // データの書込み
         }
-        break;
-
-      // GS button down not supported yet
-      case 0x8:
         break;
 
       // Reencryption (DEADFACE) not supported yet
@@ -266,10 +259,6 @@ static void process_cheat_gs1(CHEAT_TYPE *cheat)
           code_ptr += skip * 2;
           i += skip;
         }
-        break;
-
-      // Hook routine not supported yet (not important??)
-      case 0x0F:
         break;
     }
   }
@@ -402,6 +391,102 @@ static void process_cheat_gs3(CHEAT_TYPE *cheat)
   }
 }
 
+static void process_cheat_xta(CHEAT_TYPE *cheat)
+{
+  u32 cheat_opcode;
+  u32 *code_ptr = cheat->cheat_codes;
+  u32 address, value;
+  u32 i;
+
+  for(i = 0; i < cheat->num_cheat_lines; i++)
+  {
+    address = code_ptr[0];
+    value = code_ptr[1] & 0xFFFF;
+
+    code_ptr += 2;
+
+    cheat_opcode = address >> 28;
+    address &= 0xFFFFFFF;
+
+    switch(cheat_opcode)
+    {
+      case 0x3:
+        write_memory8(address, value);
+        break;
+
+      case 0x8:
+        write_memory16(address, value);
+        break;
+
+      case 0x2:
+        write_memory16(address, read_memory16(address) | value);
+        break;
+
+      case 0x6:
+        write_memory16(address, read_memory16(address) & value);
+        break;
+
+      case 0x4:
+      {
+        u32 inc_adr = code_ptr[1] & 0xFFFF;
+        u32 inc_val = code_ptr[0] >> 16;
+        u32 repeat = code_ptr[0] & 0xFFFF;
+        while(repeat--)
+        {
+          write_memory16(address, value);
+          address += inc_adr;
+          value += inc_val;
+        }
+        code_ptr += 2;
+        i++;
+        break;
+      }
+
+      case 0x7:
+        if(read_memory16(address) != value)
+        {
+          if((code_ptr[0] >> 28) == 0x4) // 次の行がスライドコードだったら1行追加でスキップ
+          {
+            code_ptr += 2;
+            i++;
+          }
+          code_ptr += 2;
+          i++;
+        }
+        break;
+
+      case 0xD:
+      {
+        u32 key = read_memory16(0x04000130) ^ 0x3FF;
+        if(((address == 0x10) && (key == value)) ||
+          ((address == 0x20) && (key != value)))
+        {
+          if((code_ptr[0] >> 28) == 0x4) // 次の行がスライドコードだったら1行追加でスキップ
+          {
+            code_ptr += 2;
+            i++;
+          }
+          code_ptr += 2;
+          i++;
+        }
+        break;
+      }
+
+      case 0xF:
+        if((read_memory16(address) & value) == 0)
+        {
+          if((code_ptr[0] >> 28) == 0x4) // 次の行がスライドコードだったら1行追加でスキップ
+          {
+            code_ptr += 2;
+            i++;
+          }
+          code_ptr += 2;
+          i++;
+        }
+        break;
+    }
+  }
+}
 
 void process_cheats(void)
 {
@@ -422,6 +507,9 @@ void process_cheats(void)
         case CHEAT_TYPE_DIRECT_V3:
           process_cheat_gs3(cheats + i);
           break;
+
+        case CHEAT_TYPE_XTA:
+          process_cheat_xta(cheats + i);
 
         default:
           break;
