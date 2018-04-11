@@ -511,6 +511,7 @@ void process_cheats(void)
 
         case CHEAT_TYPE_XTA:
           process_cheat_xta(cheats + i);
+          break;
 
         default:
           break;
