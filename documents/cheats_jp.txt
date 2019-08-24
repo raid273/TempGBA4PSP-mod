@@ -66,8 +66,17 @@ gameshark_v1/v2/PAR_v1/v2/direct_v1/v2
 			20000000 20000001
 			20000002 00000000
 
-	60aaaaaa y000xxxx
-		ROMアドレス8000000h+aaaaaa*2byteデータxxxxを書込
+    30y000xx 0aaaaaaa
+    30y0xxxx 0aaaaaaa
+    30y0zzzz 0aaaaaaa xxxxxxxx 00000000
+        アドレスaaaaaaaの数値をxxずつ加減算し続ける
+        zの詳細は不明
+
+        注意
+        現在未対応
+
+	64aaaaaa y000xxxx
+		ROMアドレス8000000h+aaaaaa*2に2byteデータxxxxを書込
 		[8000000h+aaaaaa*2]=xxxx
 		yの詳細は不明
 
@@ -91,25 +100,17 @@ gameshark_v1/v2/PAR_v1/v2/direct_v1/v2
 		注意
 		現在未対応
 
-	Daaaaaaa 0000xxxx
-	Daaaaaaa 0010xxxx
-	Daaaaaaa 0020xxxx
-	Daaaaaaa 0030xxxx
+	Daaaaaaa 0000xxxx [a]==x
+	Daaaaaaa 0010xxxx [a]!=x
+	Daaaaaaa 0020xxxx [a]<=x
+	Daaaaaaa 0030xxxx [a]>=x
 		アドレスaaaaaの内容を2byteデータxxxxと比較し、偽の場合は次のコードをスキップする
-		条件は上から順に、[a]=x,[a]!=x,[a]<=x,[a]>=x
 
-		注意
-		現在[a]=x以外は未対応
-
-	E0zzxxxx 0aaaaaaa
-	E0zzxxxx 1aaaaaaa
-	E0zzxxxx 2aaaaaaa
-	E0zzxxxx 3aaaaaaa
-		アドレスaaaaaの内容を2byteデータxxxxと比較し、偽の場合はzzで指示するコードをスキップする
-		条件は上から順に、[a]=x,[a]!=x,[a]<=x,[a]>=x
-
-		注意
-		現在[a]=x以外は未対応
+	E0yyxxxx 0aaaaaaa [a]==x
+	E0yyxxxx 1aaaaaaa [a]!=x
+	E0yyxxxx 2aaaaaaa [a]<=x
+	E0yyxxxx 3aaaaaaa [a]>=x
+		アドレスaaaaaの内容を2byteデータxxxxと比較し、偽の場合は以下のyy行のコードをスキップする
 
 	Faaaaaaa 00000x0y
 	xxxxxxxx 001DC0DE
@@ -121,6 +122,20 @@ gameshark_v1/v2/PAR_v1/v2/direct_v1/v2
 
 		注意
 		現在未対応
+
+以下は本来PARに存在しないコードです
+
+    Daaaaaaa 200000xx [a]==x
+    Daaaaaaa 201000xx [a]!=x
+    Daaaaaaa 202000xx [a]<=x
+    Daaaaaaa 203000xx [a]>=x
+        アドレスaaaaaの内容を1byteデータxxと比較し、偽の場合は次のコードをスキップする
+
+    E1yy00xx 0aaaaaaa [a]==x
+    E1yy00xx 1aaaaaaa [a]!=x
+    E1yy00xx 2aaaaaaa [a]<=x
+    E1yy00xx 3aaaaaaa [a]>=x
+        アドレスaaaaaの内容を1byteデータxxと比較し、偽の場合は以下のyy行のコードをスキップする
 
 
 gameshark_v3/PAR_v3/direct_v3
@@ -180,14 +195,14 @@ X-TA/CodeBreaker
 		アドレスaaaaaaaに2byteデータxxxxを書込
 
 	2aaaaaaa xxxx
-		アドレスaaaaaaaから2byte分のデータとxxxxをOR
+		アドレスaaaaaaaに2byteデータxxxxをOR書込
 
 	6aaaaaaa xxxx
-		アドレスaaaaaaaから2byte分のデータとxxxxをAND
+		アドレスaaaaaaaに2byteデータxxxxをAND書込
 
 	4aaaaaaa xxxx
 	yyyycccc bbbb
-		アドレスaaaaaaaにアドレス加算値bbbbを、2byteデータxxxxにデータ加算値yyyyを加えながら
+		アドレスaaaaにアドレス加算値bbbbを、2byteデータxxxxにデータ加算値yyyyを加えながら
 		cccc回繰り返し書込
 
 	5aaaaaaa cccc
@@ -210,9 +225,6 @@ X-TA/CodeBreaker
 	Caaaaaaa xxxx [a]<x
 	Faaaaaaa xxxx [a]&x
 		アドレスaaaaaaaから2byte分のデータをxxxxと比較し、偽の場合は次のコードをスキップする
-
-		注意
-		現在[a]==xと[a]&x以外は未対応
 
 	D0000010 xxxx !=
 	D0000020 xxxx ==
