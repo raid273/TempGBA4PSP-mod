@@ -112,7 +112,7 @@ void add_cheats(char *cheats_filename)
             {
                 current_cheat_variant = CHEAT_TYPE_DIRECT_V3;
             }
-            else if (!strcasecmp(current_line, "X-TA") ||
+            else if (!strcasecmp(current_line, "XTA") ||
                      !strcasecmp(current_line, "codebreaker") ||
                      !strcasecmp(current_line, "!"))
             {
@@ -264,6 +264,82 @@ static void process_cheat_gs1(CHEAT_TYPE *cheat)
             {
                 ADDRESS16(gamepak_rom, (address << 1) - 0x08000000) = (value & 0xFFFF); // データの書込み
             }
+            break;
+        }
+
+        // ビット演算
+        // 7aaaaaaa 0x0ydddd
+        // 0bbbbbbb vvvvvvvv
+        // x=0: 1行 アドレスaの数値とddddをyで指定した方法・サイズで演算する
+        //   1: 2行 アドレスaの数値とvvvvをyで指定した方法・サイズで演算し、その数値をアドレスbに書き込む
+        //          ddddは使わない
+        // y=0: 8bit OR
+        //   1: 8bit AND
+        //   2: 8bit XOR
+        //   3: 16bit OR
+        //   4: 16bit AND
+        //   5: 16bit XOR
+        //   6: 32bit OR
+        //   7: 32bit AND
+        //   8: 32bit XOR
+        case 0x7:
+        {
+            u32 destAddr;
+            u32 calcOpcode = (value >> 16) & 0xF;
+            u32 multiLineMode = ((value >> 24) & 0xF) == 0x1;
+
+            if (multiLineMode)
+            {
+                destAddr = code_ptr[0] & 0x0FFFFFFF;
+                value = code_ptr[1];
+
+                code_ptr += 2;
+                i++;
+            }
+            else
+            {
+                destAddr = address;
+                value &= 0xFFFF;
+            }
+
+            switch (calcOpcode)
+            {
+            case 0:
+                value |= read_memory8(address);
+                break;
+            case 1:
+                value &= read_memory8(address);
+                break;
+            case 2:
+                value ^= read_memory8(address);
+                break;
+            case 3:
+                value |= read_memory16(address);
+                break;
+            case 4:
+                value &= read_memory16(address);
+                break;
+            case 5:
+                value ^= read_memory16(address);
+                break;
+            case 6:
+                value |= read_memory32(address);
+                break;
+            case 7:
+                value &= read_memory32(address);
+                break;
+            case 8:
+                value ^= read_memory32(address);
+                break;
+            }
+
+            if (calcOpcode < 3)
+                write_memory8(destAddr, value);
+            else if (calcOpcode < 6)
+                write_memory16(destAddr, value);
+            else
+                write_memory32(destAddr, value);
+
             break;
         }
 

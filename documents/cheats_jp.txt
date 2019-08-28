@@ -124,6 +124,13 @@ gameshark_v1/v2/PAR_v1/v2/direct_v1/v2
 		現在未対応
 
 以下は本来PARに存在しないコードです
+    7aaaaaaa 0x0ydddd
+    0bbbbbbb vvvvvvvv
+        xが0の場合はアドレスaaaaの数値とddddをyで指定した方法・サイズで演算して書込
+        xが1の場合は2行目を追加し、ddddではなくvvvvと演算した結果をアドレスbbbbに書込
+    y=0/1/2: 8bit OR/AND/XOR
+      3/4/5: 16bit OR/AND/XOR
+      6/7/8: 32bit OR/AND/XOR
 
     Daaaaaaa 200000xx [a]==x
     Daaaaaaa 201000xx [a]!=x
@@ -186,7 +193,7 @@ gameshark_v3/PAR_v3/direct_v3
 		現在未対応
 
 
-X-TA/CodeBreaker
+XTA/codebreaker
 
 	3aaaaaaa 00xx
 		アドレスaaaaaaaに1byteデータxxを書込
